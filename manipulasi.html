@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manipulasi Tabel Data Kawan</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        input {
+            width: 100%;
+        }
+        button {
+            padding: 5px 10px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tabel Data Kawan Kampus</h1>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>NIM</th>
+                <th>Nama</th>
+                <th>Kelas</th>
+                <th>Prodi</th>
+                <th>Alamat</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data rows akan ditambahkan di sini -->
+        </tbody>
+    </table>
+
+    <button id="addRowButton">Add</button>
+
+    <script>
+        // Mengambil data dari localStorage atau menggunakan data default jika tidak ada
+        let data = JSON.parse(localStorage.getItem("tableData")) || [
+            { nim: "242505006", nama: "Melati", kelas: "A", prodi: "Teknik Informatika", alamat: "Jl. Jerman" },
+            { nim: "242505003", nama: "Dini", kelas: "B", prodi: "Sistem Informasi", alamat: "Jl. Jepang" },
+            { nim: "242505004", nama: "Ervi", kelas: "C", prodi: "Biologi", alamat: "JL. Cina" },
+            { nim: "242505008", nama: "Fajar", kelas: "D", prodi: "Teknik Sipil", alamat: "Jl. Korea" },
+        ];
+    
+        // Menyimpan data ke localStorage
+        function saveData() {
+            localStorage.setItem("tableData", JSON.stringify(data));
+        }
+    
+        // Render Tabel
+        function renderTable() {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = ""; // Reset isi tbody
+
+            data.forEach((item, index) => {
+                let row = `<tr>
+                    <td>${index + 1}</td>
+                    <td ondblclick="editCell(this, 'nim')">${item.nim}</td>
+                    <td ondblclick="editCell(this, 'nama')">${item.nama}</td>
+                    <td ondblclick="editCell(this, 'kelas')">${item.kelas}</td>
+                    <td ondblclick="editCell(this, 'prodi')">${item.prodi}</td>
+                    <td ondblclick="editCell(this, 'alamat')">${item.alamat}</td>
+                    <td><button class="delete" onclick="deleteRow(${index})">Delete</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+    
+        // Fungsi untuk mengedit sel
+        function editCell(cell, field) {
+            let oldValue = cell.innerText;
+            let input = document.createElement("input");
+            input.value = oldValue;
+            cell.innerHTML = "";
+            cell.appendChild(input);
+    
+            let okButton = document.createElement("button");
+            okButton.innerText = "OK";
+            okButton.onclick = () => {
+                let newValue = input.value.trim();
+                if (field === "nim" && !/^[0-9]{9}$/.test(newValue)) {
+                    alert("NIM harus 9 digit angka!");
+                    return;
+                }
+                if (field === "nama" && !/^[A-Za-z ]+$/.test(newValue)) {
+                    alert("Nama hanya boleh mengandung huruf dan spasi!");
+                    return;
+                }
+                data[cell.parentElement.rowIndex - 1][field] = newValue;
+                saveData();
+                renderTable();
+            };
+    
+            let cancelButton = document.createElement("button");
+            cancelButton.innerText = "Cancel";
+            cancelButton.onclick = () => {
+                cell.innerHTML = oldValue;
+            };
+    
+            cell.appendChild(okButton);
+            cell.appendChild(cancelButton);
+        }
+    
+        // Fungsi untuk menghapus baris
+        function deleteRow(index) {
+            data.splice(index, 1);
+            saveData();
+            renderTable();
+        }
+    
+        // Fungsi untuk menambah baris data
+        function addRow() {
+            data.push({ nim: "000000000", nama: "Dummy", kelas: "SI-2X", prodi: "Sistem Informasi", alamat: "Unknown" });
+            saveData();
+            renderTable();
+        }
+    
+        // Event listener untuk tombol Add
+        document.getElementById("addRowButton").onclick = addRow;
+
+        // Menampilkan tabel setelah halaman dimuat
+        renderTable();
+    </script>
+
+</body>
+</html>
+
